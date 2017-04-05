@@ -1,0 +1,71 @@
+<!doctype html5>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.4/pixi.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body >
+    <script>
+        var app = new PIXI.Application(1920, 1080);
+        document.body.appendChild(app.view);
+
+        // create a texture from an image path
+        var texture = PIXI.Texture.fromImage('hex.png');
+
+        /* create a tiling sprite ...
+         * requires a texture, a width and a height
+         * in WebGL the image size should preferably be a power of two
+         */
+        var tilingSprite = new PIXI.extras.TilingSprite(
+            texture,
+            1920,
+            1080
+        );
+        app.stage.addChild(tilingSprite);
+
+        /*var count = 0;
+        app.ticker.add(function() {
+
+            count += 0.005;
+
+            tilingSprite.tileScale.x = 2 + Math.sin(count);
+            tilingSprite.tileScale.y = 2 + Math.cos(count);
+
+            tilingSprite.tilePosition.x += 1;
+            tilingSprite.tilePosition.y += 1;
+        });*/
+        addDragNDrop();
+        function addDragNDrop() {
+            var stage = app.stage;
+            stage.interactive = true;
+
+            var isDragging = false,
+                prevX, prevY;
+
+            stage.mousedown = function (moveData) {
+                var pos = moveData.data.global;
+                prevX = pos.x; prevY = pos.y;
+                isDragging = true;
+            };
+
+            stage.mousemove = function (moveData) {
+                if (!isDragging) {
+                    return;
+                }
+                var pos = moveData.data.global;
+                var dx = pos.x - prevX;
+                var dy = pos.y - prevY;
+
+                tilingSprite.tilePosition.x += dx;
+                tilingSprite.tilePosition.y += dy;
+                prevX = pos.x; prevY = pos.y;
+            };
+
+            stage.mouseup = function (moveDate) {
+                isDragging = false;
+            };
+        }
+
+    </script>
+</body>
+</html>
