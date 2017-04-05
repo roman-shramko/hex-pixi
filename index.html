@@ -6,8 +6,17 @@
 </head>
 <body >
     <script>
-        var app = new PIXI.Application(1920, 1080);
-        document.body.appendChild(app.view);
+        var onWindowResize = function() {
+            renderer.resize(window.innerWidth, window.innerHeight);
+            tilingSprite.width = window.innerWidth;
+            tilingSprite.height = window.innerHeight;
+            stage.hitArea = new PIXI.Rectangle(0, 0, window.innerWidth, window.innerHeight);
+        }
+
+        var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
+        var stage = new PIXI.Container();
+        document.body.appendChild(renderer.view);
+        window.addEventListener("resize", onWindowResize);
 
         // create a texture from an image path
         var texture = PIXI.Texture.fromImage('hex.png');
@@ -18,25 +27,21 @@
          */
         var tilingSprite = new PIXI.extras.TilingSprite(
             texture,
-            1920,
-            1080
+            window.innerWidth,
+            window.innerHeight
         );
-        app.stage.addChild(tilingSprite);
+        stage.addChild(tilingSprite);
 
-        /*var count = 0;
-        app.ticker.add(function() {
+        render();
 
-            count += 0.005;
+        function render() {
+            // render the root container
+            renderer.render(stage);
+            requestAnimationFrame(render);
+        }
 
-            tilingSprite.tileScale.x = 2 + Math.sin(count);
-            tilingSprite.tileScale.y = 2 + Math.cos(count);
-
-            tilingSprite.tilePosition.x += 1;
-            tilingSprite.tilePosition.y += 1;
-        });*/
         addDragNDrop();
         function addDragNDrop() {
-            var stage = app.stage;
             stage.interactive = true;
 
             var isDragging = false,
