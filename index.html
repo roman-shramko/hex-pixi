@@ -97,8 +97,11 @@
                 //Check to see that the scale is not outside of the specified bounds
                 if (zoomScale > zoomScaleMax) zoomScale = zoomScaleMax;
                 else if (zoomScale < zoomScaleMin) zoomScale = zoomScaleMin;
-                //Set the position and scale of the DisplayObjectContainer
-                //TODO calculate and set zoom position offset (zoom to center of window or cursor)
+                //Set the position and scale
+                var mouseX = evt.clientX;
+                var mouseY = evt.clientY;
+                tilingSprite.tilePosition.x = (tilingSprite.tilePosition.x - mouseX) * (zoomScale / oldScale) + mouseX;
+                tilingSprite.tilePosition.y = (tilingSprite.tilePosition.y - mouseY) * (zoomScale / oldScale) + mouseY;
                 tilingSprite.tileScale.x = zoomScale;
                 tilingSprite.tileScale.y = zoomScale;
             }
