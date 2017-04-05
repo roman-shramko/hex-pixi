@@ -18,6 +18,8 @@
         document.body.appendChild(renderer.view);
         window.addEventListener("resize", onWindowResize);
 
+        var zoomScale = 1;
+
         // create a texture from an image path
         var texture = PIXI.Texture.fromImage('hex.png');
 
@@ -69,6 +71,37 @@
             stage.mouseup = function (moveDate) {
                 isDragging = false;
             };
+
+            var body = document.body;
+            var zoomScaleMax = 10;
+            var zoomScaleMin = 0.25;
+            if (body.addEventListener){
+                body.addEventListener( 'mousewheel', zoom, false );     // Chrome/Safari/Opera
+                body.addEventListener( 'DOMMouseScroll', zoom, false ); // Firefox
+            }else if (body.attachEvent){
+                body.attachEvent('onmousewheel',zoom);                  // IE
+            }
+
+            function wheelDirection(evt){
+                if (!evt) evt = event;
+                return (evt.detail<0) ? 1 : (evt.wheelDelta>0) ? 0.25 : -0.25;
+            };
+
+            function zoom(evt){
+                // Find the direction that was scrolled
+                var direction = wheelDirection(evt);
+                // Set the old scale to be referenced later
+                var oldScale = tilingSprite.tileScale.x;
+                // Manipulate the scale based on direction
+                zoomScale = oldScale + direction;
+                //Check to see that the scale is not outside of the specified bounds
+                if (zoomScale > zoomScaleMax) zoomScale = zoomScaleMax;
+                else if (zoomScale < zoomScaleMin) zoomScale = zoomScaleMin;
+                //Set the position and scale of the DisplayObjectContainer
+                //TODO calculate and set zoom position offset (zoom to center of window or cursor)
+                tilingSprite.tileScale.x = zoomScale;
+                tilingSprite.tileScale.y = zoomScale;
+            }
         }
 
     </script>
