@@ -27,6 +27,7 @@ var zoomScale = 1;
 // create a texture from an image path
 var texture = PIXI.Texture.fromImage('assets/hex.png');
 var addButtonTexture = PIXI.Texture.fromImage('assets/skins/add_button.png');
+var closeButtonTexture = PIXI.Texture.fromImage('assets/skins/close_button.png');
 var contentTextures = [];
 for (var i=1;i<4;i++) {
     contentTextures.push(PIXI.Texture.fromImage('assets/content/0' + i + '.png'));
