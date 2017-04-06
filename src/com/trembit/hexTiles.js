@@ -49,7 +49,9 @@ stage.addChild(tilingSprite);
 render();
 
 var marker = new PIXI.Container();
+var markerI, markerJ;
 var content = [];
+var contentModel = [];
 
 function render() {
     // render the root container
@@ -83,8 +85,10 @@ function addDragNDrop() {
         tilingSprite.tilePosition.x += dx;
         tilingSprite.tilePosition.y += dy;
         for (var i=0;i<content.length;i++) {
-            content[i].position.x += dx;
-            content[i].position.y += dy;
+            if (content[i] && content[i].transform) {
+                content[i].position.x += dx;
+                content[i].position.y += dy;
+            }
         }
         if (marker && marker.position) {
             marker.position.x += dx;
@@ -136,10 +140,12 @@ function addDragNDrop() {
         tilingSprite.tileScale.x = zoomScale*TILE_SCALE_MULTIPLIER;
         tilingSprite.tileScale.y = zoomScale*TILE_SCALE_MULTIPLIER*TILE_SCALE_ASPECT_FIX_MULTIPLIER;
         for (var i=0;i<content.length;i++) {
-            content[i].position.x = (content[i].position.x - mouseX) * (zoomScale / oldScale) + mouseX;
-            content[i].position.y = (content[i].position.y - mouseY) * (zoomScale / oldScale) + mouseY;
-            content[i].scale.x = zoomScale;
-            content[i].scale.y = zoomScale;
+            if (content[i] && content[i].transform) {
+                content[i].position.x = (content[i].position.x - mouseX) * (zoomScale / oldScale) + mouseX;
+                content[i].position.y = (content[i].position.y - mouseY) * (zoomScale / oldScale) + mouseY;
+                content[i].scale.x = zoomScale;
+                content[i].scale.y = zoomScale;
+            }
         }
         if (marker && marker.position) {
             marker.position.x = (marker.position.x - mouseX) * (zoomScale / oldScale) + mouseX;
@@ -177,7 +183,9 @@ function addElementsLogic() {
 
         //addMarker(neededCellPosition.x, neededCellPosition.y);
         //for (var i = 0; i < 1000; i++) {
+        if(!contentModel.includes([neededCellPosition.x, neededCellPosition.y])){
             addMarker(neededCellPosition.x, neededCellPosition.y);
+        }
        // }
     };
     function addMarker(i, j) {
@@ -198,6 +206,8 @@ function addElementsLogic() {
         stage.addChild(hexSprite);
         stage.removeChild(marker);
         marker = hexSprite;
+        markerI = i;
+        markerJ = j;
     }
 
     function createHexagon(bigRadius, color) {
@@ -297,6 +307,14 @@ function addElementsLogic() {
         hexagon.removeChildren();
         hexagon.removeListener('pointerdown', onContentChosen);
 
+        //TODO: move content to separate class, get rid of parent reference
+
+        var createdContent = new PIXI.Container();
+        createdContent.position.x = hexagon.position.x;
+        createdContent.position.y = hexagon.position.y;
+        createdContent.scale.x = zoomScale;
+        createdContent.scale.y = zoomScale;
+
         var mask = new PIXI.Graphics();
         mask.beginFill(0xffffff);
         var polygonArgs = [];
@@ -308,27 +326,32 @@ function addElementsLogic() {
         polygonArgs.push(HEXAGON_BIG_DIAMETER*Math.sin(HEX_ANGLES[0])/2);
         mask.drawPolygon(polygonArgs);
         mask.endFill();
-        hexagon.addChild(mask);
+        createdContent.addChild(mask);
 
         var image = new PIXI.Sprite(contentTextures[0]);
         image.scale.x = image.scale.y = HEXAGON_BIG_DIAMETER/image.width;
         image.x = -image.width/2;
         image.y = -image.height/2;
         image.mask = mask;
-        hexagon.addChild(image);
+        createdContent.addChild(image);
 
         var stroke = new PIXI.Graphics();
         stroke.lineStyle(1.5, 0x000000, 1);
         stroke.drawPolygon(polygonArgs);
-        hexagon.addChild(stroke);
+        createdContent.addChild(stroke);
 
         var closeButton = new PIXI.Sprite(closeButtonTexture);
         closeButton.scale.x = closeButton.scale.y = HEXAGON_BIG_DIAMETER*0.25/(closeButton.width);
         closeButton.x = -closeButton.width/2;
         closeButton.y = -closeButton.height/2 + 0.375*HEXAGON_BIG_DIAMETER;
         closeButton.interactive = true;
-        hexagon.addChild(closeButton);
-        closeButton.on("pointerdown", function () {hexagon.destroy();});
+        createdContent.addChild(closeButton);
+        closeButton.on("pointerdown", function (e) {e.currentTarget.parent.destroy();});
+
+        content.push(createdContent);
+        stage.addChild(createdContent);
+        contentModel.push([markerI, markerJ]);
+        //hexagon.on("pointerdown", function () {hexagon.destroy();});
     }
 
     function getDecimal(num) {
