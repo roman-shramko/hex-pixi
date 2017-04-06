@@ -269,7 +269,6 @@ function addElementsLogic() {
     }
 
     function onHexagonClick(e) {
-        console.log('Add button clicked!');
         e.stopPropagation();
         var hexagon = e.currentTarget;
         hexagon.removeChildren();
@@ -297,19 +296,39 @@ function addElementsLogic() {
         var hexagon = e.currentTarget;
         hexagon.removeChildren();
         hexagon.removeListener('pointerdown', onContentChosen);
-        var g = new PIXI.Graphics();
-        g.beginFill(0xffffff);
+
+        var mask = new PIXI.Graphics();
+        mask.beginFill(0xffffff);
         var polygonArgs = [];
         for (var i=0; i<HEX_ANGLES.length; i++) {
-            polygonArgs.push(HEXAGON_BIG_DIAMETER/2*Math.cos(HEX_ANGLES[i]));
-            polygonArgs.push(HEXAGON_BIG_DIAMETER/2*Math.sin(HEX_ANGLES[i]));
+            polygonArgs.push(HEXAGON_BIG_DIAMETER*Math.cos(HEX_ANGLES[i])/2);
+            polygonArgs.push(HEXAGON_BIG_DIAMETER*Math.sin(HEX_ANGLES[i])/2);
         }
-        polygonArgs.push(HEXAGON_BIG_DIAMETER/2*Math.cos(HEX_ANGLES[0]));
-        polygonArgs.push(HEXAGON_BIG_DIAMETER/2*Math.sin(HEX_ANGLES[0]));
-        g.drawPolygon(polygonArgs);
-        g.endFill();
-        hexagon.addChild(g);
-        hexagon.on("pointerdown", function () {hexagon.destroy();});
+        polygonArgs.push(HEXAGON_BIG_DIAMETER*Math.cos(HEX_ANGLES[0])/2);
+        polygonArgs.push(HEXAGON_BIG_DIAMETER*Math.sin(HEX_ANGLES[0])/2);
+        mask.drawPolygon(polygonArgs);
+        mask.endFill();
+        hexagon.addChild(mask);
+
+        var image = new PIXI.Sprite(contentTextures[0]);
+        image.scale.x = image.scale.y = HEXAGON_BIG_DIAMETER/image.width;
+        image.x = -image.width/2;
+        image.y = -image.height/2;
+        image.mask = mask;
+        hexagon.addChild(image);
+
+        var stroke = new PIXI.Graphics();
+        stroke.lineStyle(1.5, 0x000000, 1);
+        stroke.drawPolygon(polygonArgs);
+        hexagon.addChild(stroke);
+
+        var closeButton = new PIXI.Sprite(closeButtonTexture);
+        closeButton.scale.x = closeButton.scale.y = HEXAGON_BIG_DIAMETER*0.25/(closeButton.width);
+        closeButton.x = -closeButton.width/2;
+        closeButton.y = -closeButton.height/2 + 0.375*HEXAGON_BIG_DIAMETER;
+        closeButton.interactive = true;
+        hexagon.addChild(closeButton);
+        closeButton.on("pointerdown", function () {hexagon.destroy();});
     }
 
     function getDecimal(num) {
