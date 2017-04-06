@@ -27,6 +27,7 @@ var zoomScale = 1;
 // create a texture from an image path
 var texture = PIXI.Texture.fromImage('assets/hex.png');
 var addButtonTexture = PIXI.Texture.fromImage('assets/skins/add_button.png');
+var closeButtonTexture = PIXI.Texture.fromImage('assets/skins/close_button.png');
 var contentTextures = [];
 for (var i=1;i<4;i++) {
     contentTextures.push(PIXI.Texture.fromImage('assets/content/0' + i + '.png'));
@@ -227,7 +228,8 @@ function addElementsLogic() {
         // }
 
         // var g = new PIXI.Graphics();
-        // g.beginFill(color);
+        // g.lineStyle(1.5, 0x000000, 1);
+        // g.beginFill(0xffffff);
         // var polygonArgs = [];
         // for (var i=0; i<HEX_ANGLES.length; i++) {
         //     polygonArgs.push(bigRadius*Math.cos(HEX_ANGLES[i]));
@@ -237,6 +239,8 @@ function addElementsLogic() {
         // polygonArgs.push(bigRadius*Math.sin(HEX_ANGLES[0]));
         // g.drawPolygon(polygonArgs);
         // g.endFill();
+        // hexagon.addChild(g);
+
         return hexagon;
     }
 
