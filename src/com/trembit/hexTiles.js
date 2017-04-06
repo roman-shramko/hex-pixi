@@ -62,6 +62,20 @@ function render() {
 addDragNDrop();
 addElementsLogic();
 function addDragNDrop() {
+
+    var style = new PIXI.TextStyle({
+        fontFamily: 'Arial',
+        fontSize: 24,
+        fill: '#ffffff'
+    });
+
+
+    var richText = new PIXI.Text('Use mouse wheel to zoom', style);
+    richText.x = stage.width - 300;
+    richText.y = stage.height - 50;
+
+    stage.addChild(richText);
+
     stage.interactive = true;
 
     var isDragging = false,
@@ -183,6 +197,31 @@ function addElementsLogic() {
 
         //addMarker(neededCellPosition.x, neededCellPosition.y);
         //for (var i = 0; i < 1000; i++) {
+        neededCellPosition.x = ((pos.x-tilingSprite.tilePosition.x)/(zoomScale*(HEXAGON_BIG_DIAMETER+2.7)))*(4/3);
+        neededCellPosition.y = ((pos.y-tilingSprite.tilePosition.y)/(zoomScale*(HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP)));
+        var x = getDecimal(neededCellPosition.x);
+        var y = getDecimal(neededCellPosition.y);
+        console.log(x, y);
+        if (Math.floor(neededCellPosition.x)%2 == 0) {
+            if (x <= 2/3) {
+                neededCellPosition.x = Math.floor((pos.x - tilingSprite.tilePosition.x)/(zoomScale*(Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + 2)));
+            }
+            else if ((y <= 0.5 && y + 1.5 * x <= 1.5) || (y >= 1.5 * x - 0.5)) {
+                neededCellPosition.x = Math.floor((pos.x - tilingSprite.tilePosition.x)/(zoomScale*(Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + 2)));
+            }
+            else {
+                neededCellPosition.x = Math.ceil((pos.x - tilingSprite.tilePosition.x)/(zoomScale*(Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + 2)));
+            }
+        }
+        else {
+            if (Math.abs(y - 1/2) <= 1.5 * Math.abs(x-1)) {
+                neededCellPosition.x = Math.floor((pos.x - tilingSprite.tilePosition.x)/(zoomScale*(Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + 2)));
+            }
+            else {
+                neededCellPosition.x = Math.ceil((pos.x - tilingSprite.tilePosition.x)/(zoomScale*(Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + 2)));
+            }
+        }
+        neededCellPosition.y = Math.round(((pos.y-tilingSprite.tilePosition.y)/(zoomScale*(HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP))) + 0.5 * (Math.abs(neededCellPosition.x % 2)));
         for (var i = 0; i < contentModel.length; i++) {
             if (contentModel[i][0] == neededCellPosition.x && contentModel[i][1] == neededCellPosition.y){
                 return;
@@ -210,9 +249,58 @@ function addElementsLogic() {
         hexSprite.scale.y = zoomScale;
         stage.addChild(hexSprite);
         stage.removeChild(marker);
+        zoomToMarker(hexSprite.position.x, hexSprite.position.y);
         marker = hexSprite;
         markerI = i;
         markerJ = j;
+    }
+
+    function zoom(evt){
+        // Find the direction that was scrolled
+        var direction = wheelDirection(evt);
+        // Set the old scale to be referenced later
+        var oldScale = tilingSprite.tileScale.x/TILE_SCALE_MULTIPLIER;
+        // Manipulate the scale based on direction
+        zoomScale = oldScale + direction;
+        //Check to see that the scale is not outside of the specified bounds
+        if (zoomScale > 10) zoomScale = 10;
+        else if (zoomScale < 0.5) zoomScale = 0.5;
+        //Set the position and scale
+        var mouseX = evt.clientX;
+        var mouseY = evt.clientY;
+        tilingSprite.tilePosition.x = (tilingSprite.tilePosition.x - mouseX) * (zoomScale / oldScale) + mouseX;
+        tilingSprite.tilePosition.y = (tilingSprite.tilePosition.y - mouseY) * (zoomScale / oldScale) + mouseY;
+        tilingSprite.tileScale.x = zoomScale*TILE_SCALE_MULTIPLIER;
+        tilingSprite.tileScale.y = zoomScale*TILE_SCALE_MULTIPLIER*TILE_SCALE_ASPECT_FIX_MULTIPLIER;
+        for (var i=0;i<content.length;i++) {
+            if (content[i] && content[i].transform) {
+                content[i].position.x = (content[i].position.x - mouseX) * (zoomScale / oldScale) + mouseX;
+                content[i].position.y = (content[i].position.y - mouseY) * (zoomScale / oldScale) + mouseY;
+                content[i].scale.x = zoomScale;
+                content[i].scale.y = zoomScale;
+            }
+        }
+        if (marker && marker.position) {
+            marker.position.x = (marker.position.x - mouseX) * (zoomScale / oldScale) + mouseX;
+            marker.position.y = (marker.position.y - mouseY) * (zoomScale / oldScale) + mouseY;
+            marker.scale.x = zoomScale;
+            marker.scale.y = zoomScale;
+        }
+    }
+
+    function wheelDirection(evt){
+        if (!evt) evt = event;
+        return (evt.detail<0) ? 1 : (evt.wheelDelta>0) ? 0.25 : -0.25;
+    }
+
+    function zoomToMarker(x, y) {
+        if (zoomScale < 10) {
+            var evt = {wheelDelta:1, clientX:x, clientY:y};
+            zoom(evt);
+            setTimeout(function () {
+                zoomToMarker(x, y);
+            }, 25);
+        }
     }
 
     function createHexagon(bigRadius, color) {
