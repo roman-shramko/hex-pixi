@@ -27,6 +27,10 @@ var zoomScale = 1;
 // create a texture from an image path
 var texture = PIXI.Texture.fromImage('assets/hex.png');
 var addButtonTexture = PIXI.Texture.fromImage('assets/skins/add_button.png');
+var contentTextures = [];
+for (var i=1;i<4;i++) {
+    contentTextures.push(PIXI.Texture.fromImage('assets/content/0' + i + '.png'));
+}
 
 /* create a tiling sprite ...
  * requires a texture, a width and a height
@@ -174,6 +178,21 @@ function addElementsLogic() {
 
         hexagon.addChild(addButton);
 
+        // var selectImageBackground = createSlicedHexagon(bigRadius, 0xffffff);
+        // var selectImageLabel = new PIXI.Text('Choose content', { font: '35px Snippet', fill: 'white'});
+        // selectImageLabel.scale.x = selectImageLabel.scale.y = bigRadius*0.6/(selectImageLabel.width);
+        // selectImageLabel.x = -selectImageLabel.width/2;
+        // selectImageLabel.y = -selectImageLabel.height/2 - 0.3*HEXAGON_SMALL_DIAMETER;
+        // hexagon.addChild(selectImageBackground);
+        // hexagon.addChild(selectImageLabel);
+        // for (var i=0; i<contentTextures.length; i++) {
+        //     var image = new PIXI.Sprite(contentTextures[i]);
+        //     image.scale.x = image.scale.y = bigRadius*0.45/image.width;
+        //     image.x = -image.width/2 + (i - 1)*(bigRadius*0.5);
+        //     image.y = -image.height/2;
+        //     hexagon.addChild(image);
+        // }
+
         // var g = new PIXI.Graphics();
         // g.beginFill(color);
         // var polygonArgs = [];
@@ -186,6 +205,30 @@ function addElementsLogic() {
         // g.drawPolygon(polygonArgs);
         // g.endFill();
         return hexagon;
+    }
+
+    function createSlicedHexagon(bigRadius, color) {
+        var g = new PIXI.Graphics();
+        g.beginFill(color);
+        var polygonArgs = [];
+        for (var i=0; i<HEX_ANGLES.length; i++) {
+            polygonArgs.push(bigRadius*Math.cos(HEX_ANGLES[i]));
+            polygonArgs.push(bigRadius*Math.sin(HEX_ANGLES[i]));
+        }
+        polygonArgs.push(bigRadius*Math.cos(HEX_ANGLES[0]));
+        polygonArgs.push(bigRadius*Math.sin(HEX_ANGLES[0]));
+        //slice top and bottom of hex
+        polygonArgs[2] = (polygonArgs[0] + polygonArgs[2])/2;
+        polygonArgs[3] = (polygonArgs[1] + polygonArgs[3])/2;
+        polygonArgs[4] = (polygonArgs[6] + polygonArgs[4])/2;
+        polygonArgs[5] = (polygonArgs[7] + polygonArgs[5])/2;
+        polygonArgs[8] = (polygonArgs[6] + polygonArgs[8])/2;
+        polygonArgs[9] = (polygonArgs[7] + polygonArgs[9])/2;
+        polygonArgs[10] = (polygonArgs[0] + polygonArgs[10])/2;
+        polygonArgs[11] = (polygonArgs[1] + polygonArgs[11])/2;
+        g.drawPolygon(polygonArgs);
+        g.endFill();
+        return g;
     }
 
     function onHexagonClick() {
