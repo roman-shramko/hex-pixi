@@ -135,17 +135,17 @@ function addDragNDrop() {
 
 function addElementsLogic() {
     stage.mouseclick = function (moveData) {
-        for (var i = 0;i< 50; i++) {
-            for (var j = 0;j< 50; j++) {
-                addMarker(i, j);
-            }
-        }
+        var pos = moveData.data.global;
+        var neededCellPosition = {x: 0, y: 0};
+        neededCellPosition.x = Math.round((pos.x-tilingSprite.tilePosition.x)/(zoomScale*(HEXAGON_BIG_DIAMETER+HEXAGONS_LAYOUT_GAP)));
+        neededCellPosition.y = Math.round((pos.y-tilingSprite.tilePosition.y)/(zoomScale*(HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP)));
+        addMarker(neededCellPosition.x, neededCellPosition.y);
     };
 
     function addMarker(i, j) {
         //calculate native coords
         var x = i * (Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + HEXAGONS_LAYOUT_GAP);
-        var y = (i % 2 == 1) ? (j-0.5) * (HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP) : j * (HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP);
+        var y = (Math.abs(i % 2) == 1) ? (j-0.5) * (HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP) : j * (HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP);
         //adjust position to background texture
         x += HEXAGON_IN_TILE_OFFSET.x;
         y += HEXAGON_IN_TILE_OFFSET.y;
