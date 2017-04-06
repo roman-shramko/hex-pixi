@@ -147,7 +147,7 @@ function addElementsLogic() {
         var neededCellPosition = {x: 0, y: 0};
         neededCellPosition.x = Math.round(((pos.x-tilingSprite.tilePosition.x)/(zoomScale*(HEXAGON_BIG_DIAMETER+2.7)))*(4/3));
         /*neededCellPosition.x = Math.round((pos.x - tilingSprite.tilePosition.x)/(zoomScale*(Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + 2)));*/
-        neededCellPosition.y = Math.round((pos.y-tilingSprite.tilePosition.y)/(zoomScale*(HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP)));
+        neededCellPosition.y = Math.round(((pos.y-tilingSprite.tilePosition.y)/(zoomScale*(HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP))) + 0.5 * (neededCellPosition.x % 2));
         //TODO: get rid of this, rewrite algorithm
 
         /*if((Math.floor(neededCellPosition.x + 0.333333) == Math.floor(neededCellPosition.x)) || (Math.abs((getDecimal(neededCellPosition.x) - 2/3) * 1.5) + Math.abs(getDecimal(neededCellPosition.y) - 0.5 * Math.abs(Math.floor(neededCellPosition.x)%2))) > 1/2) {
