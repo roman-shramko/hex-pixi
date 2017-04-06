@@ -25,7 +25,7 @@ window.addEventListener("resize", onWindowResize);
 var zoomScale = 1;
 
 // create a texture from an image path
-var texture = PIXI.Texture.fromImage('hex.png');
+var texture = PIXI.Texture.fromImage('assets/hex.png');
 
 /* create a tiling sprite ...
  * requires a texture, a width and a height
