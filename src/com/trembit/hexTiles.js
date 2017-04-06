@@ -85,8 +85,10 @@ function addDragNDrop() {
             content[i].position.x += dx;
             content[i].position.y += dy;
         }
-        marker.position.x += dx;
-        marker.position.y += dy;
+        if (marker && marker.position) {
+            marker.position.x += dx;
+            marker.position.y += dy;
+        }
         prevX = pos.x; prevY = pos.y;
     };
 
@@ -138,15 +140,18 @@ function addDragNDrop() {
             content[i].scale.x = zoomScale;
             content[i].scale.y = zoomScale;
         }
-        marker.position.x = (marker.position.x - mouseX) * (zoomScale / oldScale) + mouseX;
-        marker.position.y = (marker.position.y - mouseY) * (zoomScale / oldScale) + mouseY;
-        marker.scale.x = zoomScale;
-        marker.scale.y = zoomScale;
+        if (marker && marker.position) {
+            marker.position.x = (marker.position.x - mouseX) * (zoomScale / oldScale) + mouseX;
+            marker.position.y = (marker.position.y - mouseY) * (zoomScale / oldScale) + mouseY;
+            marker.scale.x = zoomScale;
+            marker.scale.y = zoomScale;
+        }
     }
 }
 
 function addElementsLogic() {
     stage.mouseclick = function (moveData) {
+        console.log('new hex!');
         var pos = moveData.data.global;
         var neededCellPosition = {x: 0, y: 0};
         neededCellPosition.x = Math.round(((pos.x-tilingSprite.tilePosition.x)/(zoomScale*(HEXAGON_BIG_DIAMETER+2.7)))*(4/3));
@@ -201,8 +206,8 @@ function addElementsLogic() {
         addButton.scale.x = addButton.scale.y = bigRadius/(addButton.width);
         addButton.x = -addButton.width/2;
         addButton.y = -addButton.height/2;
-        addButton.interactive = true;
-        addButton.on('pointerdown', onHexagonClick);
+        hexagon.interactive = true;
+        hexagon.on('pointerdown', onHexagonClick);
 
         hexagon.addChild(addButton);
 
@@ -259,10 +264,50 @@ function addElementsLogic() {
         return g;
     }
 
-    function onHexagonClick() {
+    function onHexagonClick(e) {
         console.log('Add button clicked!');
-        //TODO get selected hexagon and switch it to "select image" state
+        e.stopPropagation();
+        var hexagon = e.currentTarget;
+        hexagon.removeChildren();
+        hexagon.removeListener('pointerdown', onHexagonClick);
+        var selectImageBackground = createSlicedHexagon(HEXAGON_BIG_DIAMETER/2, 0xffffff);
+        var selectImageLabel = new PIXI.Text('Choose content', { font: '35px Snippet', fill: 'white'});
+        selectImageLabel.scale.x = selectImageLabel.scale.y = HEXAGON_BIG_DIAMETER/2*0.6/(selectImageLabel.width);
+        selectImageLabel.x = -selectImageLabel.width/2;
+        selectImageLabel.y = -selectImageLabel.height/2 - 0.3*HEXAGON_SMALL_DIAMETER;
+        hexagon.addChild(selectImageBackground);
+        hexagon.addChild(selectImageLabel);
+        for (var i=0; i<contentTextures.length; i++) {
+            var image = new PIXI.Sprite(contentTextures[i]);
+            image.scale.x = image.scale.y = HEXAGON_BIG_DIAMETER/2*0.45/image.width;
+            image.x = -image.width/2 + (i - 1)*(HEXAGON_BIG_DIAMETER/2*0.5);
+            image.y = -image.height/2;
+            hexagon.addChild(image);
+        }
+        hexagon.on("pointerdown", onContentChosen);
     }
+
+    function onContentChosen(e) {
+        console.log("contentChosen");
+        e.stopPropagation();
+        var hexagon = e.currentTarget;
+        hexagon.removeChildren();
+        hexagon.removeListener('pointerdown', onContentChosen);
+        var g = new PIXI.Graphics();
+        g.beginFill(0xffffff);
+        var polygonArgs = [];
+        for (var i=0; i<HEX_ANGLES.length; i++) {
+            polygonArgs.push(HEXAGON_BIG_DIAMETER/2*Math.cos(HEX_ANGLES[i]));
+            polygonArgs.push(HEXAGON_BIG_DIAMETER/2*Math.sin(HEX_ANGLES[i]));
+        }
+        polygonArgs.push(HEXAGON_BIG_DIAMETER/2*Math.cos(HEX_ANGLES[0]));
+        polygonArgs.push(HEXAGON_BIG_DIAMETER/2*Math.sin(HEX_ANGLES[0]));
+        g.drawPolygon(polygonArgs);
+        g.endFill();
+        hexagon.addChild(g);
+        hexagon.on("pointerdown", function () {hexagon.destroy();});
+    }
+
     function getDecimal(num) {
         return num - Math.floor(num);
     }
