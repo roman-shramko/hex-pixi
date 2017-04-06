@@ -222,7 +222,8 @@ function addElementsLogic() {
         // }
 
         // var g = new PIXI.Graphics();
-        // g.beginFill(color);
+        // g.lineStyle(1.5, 0x000000, 1);
+        // g.beginFill(0xffffff);
         // var polygonArgs = [];
         // for (var i=0; i<HEX_ANGLES.length; i++) {
         //     polygonArgs.push(bigRadius*Math.cos(HEX_ANGLES[i]));
@@ -232,6 +233,8 @@ function addElementsLogic() {
         // polygonArgs.push(bigRadius*Math.sin(HEX_ANGLES[0]));
         // g.drawPolygon(polygonArgs);
         // g.endFill();
+        // hexagon.addChild(g);
+
         return hexagon;
     }
 
