@@ -297,15 +297,16 @@ function addElementsLogic() {
             image.scale.x = image.scale.y = HEXAGON_BIG_DIAMETER/2*0.45/image.width;
             image.x = -image.width/2 + (i - 1)*(HEXAGON_BIG_DIAMETER/2*0.5);
             image.y = -image.height/2;
+            image.interactive = true;
+            image.on("pointerdown", onContentChosen);
             hexagon.addChild(image);
         }
-        hexagon.on("pointerdown", onContentChosen);
     }
 
     function onContentChosen(e) {
+        var hexagon = marker;
         marker = null;
         e.stopPropagation();
-        var hexagon = e.currentTarget;
         hexagon.removeChildren();
         hexagon.removeListener('pointerdown', onContentChosen);
 
@@ -330,8 +331,8 @@ function addElementsLogic() {
         mask.endFill();
         createdContent.addChild(mask);
 
-        var image = new PIXI.Sprite(contentTextures[0]);
-        image.scale.x = image.scale.y = HEXAGON_BIG_DIAMETER/image.width;
+        var image = e.currentTarget;
+        image.scale.x = image.scale.y = HEXAGON_BIG_DIAMETER*image.scale.x/image.width;
         image.x = -image.width/2;
         image.y = -image.height/2;
         image.mask = mask;
@@ -353,7 +354,6 @@ function addElementsLogic() {
         content.push(createdContent);
         stage.addChild(createdContent);
         contentModel.push([markerI, markerJ]);
-        //hexagon.on("pointerdown", function () {hexagon.destroy();});
     }
 
     function getDecimal(num) {
