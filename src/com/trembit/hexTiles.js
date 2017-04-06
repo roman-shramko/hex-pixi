@@ -169,6 +169,8 @@ function addElementsLogic() {
         addButton.scale.x = addButton.scale.y = bigRadius/(addButton.width);
         addButton.x = -addButton.width/2;
         addButton.y = -addButton.height/2;
+        addButton.interactive = true;
+        addButton.on('pointerdown', onHexagonClick);
 
         hexagon.addChild(addButton);
 
@@ -184,6 +186,11 @@ function addElementsLogic() {
         // g.drawPolygon(polygonArgs);
         // g.endFill();
         return hexagon;
+    }
+
+    function onHexagonClick() {
+        console.log('Add button clicked!');
+        //TODO get selected hexagon and switch it to "select image" state
     }
 
 }
