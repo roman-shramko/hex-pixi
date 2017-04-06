@@ -15,7 +15,7 @@ var onWindowResize = function() {
     tilingSprite.width = window.innerWidth;
     tilingSprite.height = window.innerHeight;
     stage.hitArea = new PIXI.Rectangle(0, 0, window.innerWidth, window.innerHeight);
-}
+};
 
 var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
 var stage = new PIXI.Container();
@@ -47,7 +47,8 @@ stage.addChild(tilingSprite);
 
 render();
 
-var markers = [];
+var marker = new PIXI.Container();
+var content = [];
 
 function render() {
     // render the root container
@@ -80,14 +81,16 @@ function addDragNDrop() {
 
         tilingSprite.tilePosition.x += dx;
         tilingSprite.tilePosition.y += dy;
-        for (var i=0;i<markers.length;i++) {
-            markers[i].position.x += dx;
-            markers[i].position.y += dy;
+        for (var i=0;i<content.length;i++) {
+            content[i].position.x += dx;
+            content[i].position.y += dy;
         }
+        marker.position.x += dx;
+        marker.position.y += dy;
         prevX = pos.x; prevY = pos.y;
     };
 
-    stage.mouseup = function (moveData) {
+    stage.mouseup = stage.mouseupoutside = function (moveData) {
         isDragging = false;
         var pos = moveData.data.global;
         var dx = pos.x - downX;
@@ -110,7 +113,7 @@ function addDragNDrop() {
     function wheelDirection(evt){
         if (!evt) evt = event;
         return (evt.detail<0) ? 1 : (evt.wheelDelta>0) ? 0.25 : -0.25;
-    };
+    }
 
     function zoom(evt){
         // Find the direction that was scrolled
@@ -129,12 +132,16 @@ function addDragNDrop() {
         tilingSprite.tilePosition.y = (tilingSprite.tilePosition.y - mouseY) * (zoomScale / oldScale) + mouseY;
         tilingSprite.tileScale.x = zoomScale*TILE_SCALE_MULTIPLIER;
         tilingSprite.tileScale.y = zoomScale*TILE_SCALE_MULTIPLIER*TILE_SCALE_ASPECT_FIX_MULTIPLIER;
-        for (var i=0;i<markers.length;i++) {
-            markers[i].position.x = (markers[i].position.x - mouseX) * (zoomScale / oldScale) + mouseX;
-            markers[i].position.y = (markers[i].position.y - mouseY) * (zoomScale / oldScale) + mouseY;
-            markers[i].scale.x = zoomScale;
-            markers[i].scale.y = zoomScale;
+        for (var i=0;i<content.length;i++) {
+            content[i].position.x = (content[i].position.x - mouseX) * (zoomScale / oldScale) + mouseX;
+            content[i].position.y = (content[i].position.y - mouseY) * (zoomScale / oldScale) + mouseY;
+            content[i].scale.x = zoomScale;
+            content[i].scale.y = zoomScale;
         }
+        marker.position.x = (marker.position.x - mouseX) * (zoomScale / oldScale) + mouseX;
+        marker.position.y = (marker.position.y - mouseY) * (zoomScale / oldScale) + mouseY;
+        marker.scale.x = zoomScale;
+        marker.scale.y = zoomScale;
     }
 }
 
@@ -142,11 +149,31 @@ function addElementsLogic() {
     stage.mouseclick = function (moveData) {
         var pos = moveData.data.global;
         var neededCellPosition = {x: 0, y: 0};
-        neededCellPosition.x = Math.round((pos.x-tilingSprite.tilePosition.x)/(zoomScale*(HEXAGON_BIG_DIAMETER+HEXAGONS_LAYOUT_GAP)));
+        neededCellPosition.x = Math.round(((pos.x-tilingSprite.tilePosition.x)/(zoomScale*(HEXAGON_BIG_DIAMETER+2.7)))*(4/3));
+        /*neededCellPosition.x = Math.round((pos.x - tilingSprite.tilePosition.x)/(zoomScale*(Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + 2)));*/
         neededCellPosition.y = Math.round((pos.y-tilingSprite.tilePosition.y)/(zoomScale*(HEXAGON_SMALL_DIAMETER+HEXAGONS_LAYOUT_GAP)));
-        addMarker(neededCellPosition.x, neededCellPosition.y);
-    };
+        //TODO: get rid of this, rewrite algorithm
 
+        /*if((Math.floor(neededCellPosition.x + 0.333333) == Math.floor(neededCellPosition.x)) || (Math.abs((getDecimal(neededCellPosition.x) - 2/3) * 1.5) + Math.abs(getDecimal(neededCellPosition.y) - 0.5 * Math.abs(Math.floor(neededCellPosition.x)%2))) > 1/2) {
+            console.log(neededCellPosition.x, neededCellPosition.y, 'upper');
+            neededCellPosition.x = Math.floor(neededCellPosition.x);
+        }
+        else {
+            console.log(neededCellPosition.x, neededCellPosition.y, 'lower');
+            neededCellPosition.x = Math.ceil(neededCellPosition.x);
+            //neededCellPosition.y = Math.floor(neededCellPosition.y);
+        }
+        if (neededCellPosition.x % 2 == 0) {
+            neededCellPosition.y = Math.round(neededCellPosition.y);
+        }
+        else neededCellPosition.y = Math.round(neededCellPosition.y)*/
+        //neededCellPosition.x = Math.round((pos.x - tilingSprite.tilePosition.x)/(zoomScale*(Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + 2)));
+
+        //addMarker(neededCellPosition.x, neededCellPosition.y);
+        //for (var i = 0; i < 1000; i++) {
+            addMarker(neededCellPosition.x, neededCellPosition.y);
+       // }
+    };
     function addMarker(i, j) {
         //calculate native coords
         var x = i * (Math.sqrt(Math.pow(HEXAGON_SMALL_DIAMETER,2)-Math.pow(HEXAGON_SMALL_DIAMETER/2,2)) + HEXAGONS_LAYOUT_GAP);
@@ -163,7 +190,8 @@ function addElementsLogic() {
         hexSprite.scale.x = zoomScale;
         hexSprite.scale.y = zoomScale;
         stage.addChild(hexSprite);
-        markers.push(hexSprite);
+        stage.removeChild(marker);
+        marker = hexSprite;
     }
 
     function createHexagon(bigRadius, color) {
@@ -234,6 +262,9 @@ function addElementsLogic() {
     function onHexagonClick() {
         console.log('Add button clicked!');
         //TODO get selected hexagon and switch it to "select image" state
+    }
+    function getDecimal(num) {
+        return num - Math.floor(num);
     }
 
 }
