@@ -26,6 +26,7 @@ var zoomScale = 1;
 
 // create a texture from an image path
 var texture = PIXI.Texture.fromImage('assets/hex.png');
+var addButtonTexture = PIXI.Texture.fromImage('assets/skins/add_button.png');
 
 /* create a tiling sprite ...
  * requires a texture, a width and a height
@@ -162,18 +163,27 @@ function addElementsLogic() {
     }
 
     function createHexagon(bigRadius, color) {
-        var g = new PIXI.Graphics();
-        g.beginFill(color);
-        var polygonArgs = [];
-        for (var i=0; i<HEX_ANGLES.length; i++) {
-            polygonArgs.push(bigRadius*Math.cos(HEX_ANGLES[i]));
-            polygonArgs.push(bigRadius*Math.sin(HEX_ANGLES[i]));
-        }
-        polygonArgs.push(bigRadius*Math.cos(HEX_ANGLES[0]));
-        polygonArgs.push(bigRadius*Math.sin(HEX_ANGLES[0]));
-        g.drawPolygon(polygonArgs);
-        g.endFill();
-        return g;
+        var hexagon = new PIXI.Container();
+
+        var addButton = new PIXI.Sprite(addButtonTexture);
+        addButton.scale.x = addButton.scale.y = bigRadius/(addButton.width);
+        addButton.x = -addButton.width/2;
+        addButton.y = -addButton.height/2;
+
+        hexagon.addChild(addButton);
+
+        // var g = new PIXI.Graphics();
+        // g.beginFill(color);
+        // var polygonArgs = [];
+        // for (var i=0; i<HEX_ANGLES.length; i++) {
+        //     polygonArgs.push(bigRadius*Math.cos(HEX_ANGLES[i]));
+        //     polygonArgs.push(bigRadius*Math.sin(HEX_ANGLES[i]));
+        // }
+        // polygonArgs.push(bigRadius*Math.cos(HEX_ANGLES[0]));
+        // polygonArgs.push(bigRadius*Math.sin(HEX_ANGLES[0]));
+        // g.drawPolygon(polygonArgs);
+        // g.endFill();
+        return hexagon;
     }
 
 }
