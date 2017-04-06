@@ -183,8 +183,10 @@ function addElementsLogic() {
 
         //addMarker(neededCellPosition.x, neededCellPosition.y);
         //for (var i = 0; i < 1000; i++) {
-        if(!contentModel.includes([neededCellPosition.x, neededCellPosition.y])){
-            addMarker(neededCellPosition.x, neededCellPosition.y);
+        if(!contentModel.includes([neededCellPosition.x, neededCellPosition.y])) {
+            if (!marker || markerI != neededCellPosition.x || markerJ != neededCellPosition.y) {
+                addMarker(neededCellPosition.x, neededCellPosition.y);
+            }
         }
        // }
     };
@@ -301,7 +303,7 @@ function addElementsLogic() {
     }
 
     function onContentChosen(e) {
-        console.log("contentChosen");
+        marker = null;
         e.stopPropagation();
         var hexagon = e.currentTarget;
         hexagon.removeChildren();
