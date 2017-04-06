@@ -183,10 +183,13 @@ function addElementsLogic() {
 
         //addMarker(neededCellPosition.x, neededCellPosition.y);
         //for (var i = 0; i < 1000; i++) {
-        if(!contentModel.includes([neededCellPosition.x, neededCellPosition.y])) {
-            if (!marker || markerI != neededCellPosition.x || markerJ != neededCellPosition.y) {
-                addMarker(neededCellPosition.x, neededCellPosition.y);
+        for (var i = 0; i < contentModel.length; i++) {
+            if (contentModel[i][0] == neededCellPosition.x && contentModel[i][1] == neededCellPosition.y){
+                return;
             }
+        }
+        if (!marker || markerI != neededCellPosition.x || markerJ != neededCellPosition.y) {
+            addMarker(neededCellPosition.x, neededCellPosition.y);
         }
        // }
     };
@@ -349,8 +352,17 @@ function addElementsLogic() {
         closeButton.y = -closeButton.height/2 + 0.375*HEXAGON_BIG_DIAMETER;
         closeButton.interactive = true;
         createdContent.addChild(closeButton);
-        closeButton.on("pointerdown", function (e) {e.currentTarget.parent.destroy();});
-
+        var f = function callback(e) {
+            for (var i = 0; i < contentModel.length; i++) {
+                if (contentModel[i][0] == f.i && contentModel[i][1] == f.j){
+                    contentModel.splice(i, 1);
+                }
+            }
+            e.currentTarget.parent.destroy();
+        };
+        f.i = markerI;
+        f.j = markerJ;
+        closeButton.on("pointerdown", f);
         content.push(createdContent);
         stage.addChild(createdContent);
         contentModel.push([markerI, markerJ]);

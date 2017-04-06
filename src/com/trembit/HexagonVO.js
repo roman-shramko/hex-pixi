@@ -1,5 +1,5 @@
-function HexagonVO(positionX, positionY, pictureURL) {
+function HexagonVO(positionX, positionY, container) {
     this.positionX = positionX;
     this.positionY = positionY;
-    this.pictureURL = pictureURL;
+    this.container = container;
 }
